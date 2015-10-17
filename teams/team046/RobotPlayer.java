@@ -88,15 +88,17 @@ public class RobotPlayer {
             MapLocation nextLoc;
 
             // Check for build objective
-            int bCZ = rc.readBroadcast(buildChannelZ);
-            if (bCZ == 0 & rc.senseCaptureCost() < power) {
-                targetLoc = new MapLocation(rc.readBroadcast(buildChannelX), rc.readBroadcast(buildChannelY));
-                if (rLoc.equals(targetLoc)) {
-                    rc.captureEncampment(RobotType.SUPPLIER);
-                    rc.broadcast(buildChannelZ, round);
-                    return;
-                }
+            if (power > GameConstants.BROADCAST_READ_COST) {
+                int bCZ = rc.readBroadcast(buildChannelZ);
+                if (bCZ == 0 & rc.senseCaptureCost() < power) {
+                    targetLoc = new MapLocation(rc.readBroadcast(buildChannelX), rc.readBroadcast(buildChannelY));
+                    if (rLoc.equals(targetLoc)) {
+                        rc.captureEncampment(RobotType.SUPPLIER);
+                        rc.broadcast(buildChannelZ, round);
+                        return;
+                    }
 
+                }
             }
 
             // Find an available movement direction
