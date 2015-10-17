@@ -85,9 +85,11 @@ public class RobotPlayer {
     private static void Soldier() throws GameActionException {
         if (rc.isActive()) {
             MapLocation rLoc = rc.getLocation();
-            MapLocation targetLoc;
-            targetLoc = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
-            MapLocation nextLoc;
+
+            // Set default to halfway between bases
+            MapLocation goodHQ = rc.senseHQLocation();
+            MapLocation badHQ = rc.senseEnemyHQLocation();
+            MapLocation targetLoc = new MapLocation((badHQ.x + goodHQ.x)/2, (badHQ.y + goodHQ.y)/2);
 
             // Check for build objective
             if (power > GameConstants.BROADCAST_READ_COST * 2) {
@@ -104,6 +106,13 @@ public class RobotPlayer {
                 else if (rc.readBroadcast(zergRushChannel) == 1) {
                     targetLoc = rc.senseEnemyHQLocation();
                 }
+                else {
+                    // Get scared
+                    Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 3, rc.getTeam().opponent());
+                    if (nearbyEnemies.length > 0) {
+                        return;
+                    }
+                }
             }
 
             // Find an available movement direction
@@ -118,7 +127,7 @@ public class RobotPlayer {
                 dir = dir.rotateRight();
             }
 
-            nextLoc = rLoc.add(dir);
+            MapLocation nextLoc = rLoc.add(dir);
 
             if (rc.senseMine(nextLoc) != null) {
                 rc.defuseMine(nextLoc);
