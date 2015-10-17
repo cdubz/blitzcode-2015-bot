@@ -7,11 +7,9 @@ public class RobotPlayer {
     private static RobotController rc;
     private static int round;
     private static double power;
+    private static MapLocation rallyPoint;
 
     // LOL
-    private static int buildChannelX = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int buildChannelY = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int buildChannelZ = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
@@ -28,7 +26,7 @@ public class RobotPlayer {
                 else if (rc.getType() == RobotType.SOLDIER) {
                     Soldier();
 				}
-				// End turn
+
 				rc.yield();
 			}
             catch (Exception e) {
@@ -40,45 +38,29 @@ public class RobotPlayer {
 
     private static void HQ() throws GameActionException {
         if (rc.isActive()) {
-            MapLocation hqLoc = rc.getLocation();
-            MapLocation targetLoc;
-            targetLoc = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
-
-            // Check for a build objective
-            int bCZ = rc.readBroadcast(buildChannelZ);
-
-            if (round == 0) {
-                targetLoc = setBuildTarget(hqLoc);
+            if (rc.senseEnemyNukeHalfDone()) {
+                rc.broadcast(zergRushChannel, 1);
             }
-            else if (power < 150) {
-                rc.researchUpgrade(Upgrade.NUKE);
+            else if (round > 750  && !rc.hasUpgrade(Upgrade.VISION)) {
+                rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
-            else {
-                if (bCZ == GameConstants.ROUND_MAX_LIMIT || rc.senseEnemyNukeHalfDone()) {
-                    targetLoc = rc.senseEnemyHQLocation();
-                    rc.broadcast(zergRushChannel, 1);
-                }
-                else if (round - bCZ >= GameConstants.CAPTURE_ROUND_DELAY) {
-                    rc.broadcast(buildChannelZ, 0);
-                    targetLoc = setBuildTarget(hqLoc);
-                }
-                else if (round > 50 && !rc.hasUpgrade(Upgrade.DEFUSION)) {
-                    rc.researchUpgrade(Upgrade.DEFUSION);
-                    return;
-                }
-                else if (round > 100 && !rc.hasUpgrade(Upgrade.FUSION)) {
-                    rc.researchUpgrade(Upgrade.FUSION);
-                    return;
-                }
+            else if (round > 1000  && !rc.hasUpgrade(Upgrade.DEFUSION)) {
+                rc.researchUpgrade(Upgrade.DEFUSION);
+                return;
+            }
+            else if (round > 1250 && !rc.hasUpgrade(Upgrade.FUSION)) {
+                rc.researchUpgrade(Upgrade.FUSION);
+                return;
             }
 
             // Find an available spawn direction
-            Direction dir = hqLoc.directionTo(targetLoc);
-            while (!rc.canMove(dir)) {
-                dir = dir.rotateRight();
+            for (Direction dir : Direction.values()) {
+                if (dir != Direction.NONE && dir != Direction.OMNI) {
+                    rc.spawn(dir);
+                    break;
+                }
             }
-            rc.spawn(dir);
         }
     }
 
@@ -87,23 +69,18 @@ public class RobotPlayer {
             MapLocation rLoc = rc.getLocation();
 
             // Set default to halfway between bases
-            MapLocation goodHQ = rc.senseHQLocation();
-            MapLocation badHQ = rc.senseEnemyHQLocation();
-            MapLocation targetLoc = new MapLocation((badHQ.x + goodHQ.x)/2, (badHQ.y + goodHQ.y)/2);
+            if (rallyPoint == null) {
+                MapLocation goodHQ = rc.senseHQLocation();
+                MapLocation badHQ = rc.senseEnemyHQLocation();
+                MapLocation midPoint = new MapLocation((badHQ.x + goodHQ.x) / 2, (badHQ.y + goodHQ.y) / 2);
+                rallyPoint = new MapLocation((midPoint.x + goodHQ.x)/2, (midPoint.y + goodHQ.y)/2);
+            }
+            MapLocation targetLoc = rallyPoint;
+
 
             // Check for build objective
-            if (power > GameConstants.BROADCAST_READ_COST * 2) {
-                int bCZ = rc.readBroadcast(buildChannelZ);
-                if (bCZ == 0 & rc.senseCaptureCost() < power) {
-                    targetLoc = new MapLocation(rc.readBroadcast(buildChannelX), rc.readBroadcast(buildChannelY));
-                    if (rLoc.equals(targetLoc)) {
-                        rc.captureEncampment(RobotType.SUPPLIER);
-                        rc.broadcast(buildChannelZ, round);
-                        return;
-                    }
-
-                }
-                else if (rc.readBroadcast(zergRushChannel) == 1) {
+            if (power > GameConstants.BROADCAST_READ_COST) {
+                if (rc.readBroadcast(zergRushChannel) == 1) {
                     targetLoc = rc.senseEnemyHQLocation();
                 }
                 else {
@@ -136,32 +113,6 @@ public class RobotPlayer {
                 rc.move(dir);
             }
         }
-    }
-
-    private static MapLocation setBuildTarget(MapLocation hqLoc) throws GameActionException {
-        MapLocation targetLocs[] = rc.senseEncampmentSquares(hqLoc, 500, Team.NEUTRAL);
-        MapLocation targetLoc;
-
-        if (targetLocs.length > 0) {
-            int shortest = 1000;
-            targetLoc = targetLocs[0];
-            for (MapLocation l: targetLocs) {
-                int distTo = hqLoc.distanceSquaredTo(l);
-                if (distTo < shortest) {
-                    targetLoc = l;
-                    shortest = distTo;
-                }
-            }
-            rc.broadcast(buildChannelX, targetLoc.x);
-            rc.broadcast(buildChannelY, targetLoc.y);
-        }
-        else {
-            targetLoc = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
-            rc.broadcast(buildChannelX, 0);
-            rc.broadcast(buildChannelY, 0);
-            rc.broadcast(buildChannelZ, GameConstants.ROUND_MAX_LIMIT);
-        }
-        return targetLoc;
     }
 
     private static int randomWithRange(int min, int max) {
