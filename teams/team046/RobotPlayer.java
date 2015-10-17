@@ -12,6 +12,7 @@ public class RobotPlayer {
     private static int buildChannelX = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int buildChannelY = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int buildChannelZ = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -54,8 +55,9 @@ public class RobotPlayer {
                 return;
             }
             else {
-                if (bCZ == GameConstants.ROUND_MAX_LIMIT | rc.senseEnemyNukeHalfDone()) {
+                if (bCZ == GameConstants.ROUND_MAX_LIMIT || rc.senseEnemyNukeHalfDone()) {
                     targetLoc = rc.senseEnemyHQLocation();
+                    rc.broadcast(zergRushChannel, 1);
                 }
                 else if (round - bCZ >= GameConstants.CAPTURE_ROUND_DELAY) {
                     rc.broadcast(buildChannelZ, 0);
@@ -88,7 +90,7 @@ public class RobotPlayer {
             MapLocation nextLoc;
 
             // Check for build objective
-            if (power > GameConstants.BROADCAST_READ_COST) {
+            if (power > GameConstants.BROADCAST_READ_COST * 2) {
                 int bCZ = rc.readBroadcast(buildChannelZ);
                 if (bCZ == 0 & rc.senseCaptureCost() < power) {
                     targetLoc = new MapLocation(rc.readBroadcast(buildChannelX), rc.readBroadcast(buildChannelY));
@@ -98,6 +100,9 @@ public class RobotPlayer {
                         return;
                     }
 
+                }
+                else if (rc.readBroadcast(zergRushChannel) == 1) {
+                    targetLoc = rc.senseEnemyHQLocation();
                 }
             }
 
