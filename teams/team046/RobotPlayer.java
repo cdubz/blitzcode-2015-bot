@@ -54,7 +54,7 @@ public class RobotPlayer {
                 return;
             }
             else {
-                if (bCZ == GameConstants.ROUND_MAX_LIMIT) {
+                if (bCZ == GameConstants.ROUND_MAX_LIMIT | rc.senseEnemyNukeHalfDone()) {
                     targetLoc = rc.senseEnemyHQLocation();
                 }
                 else if (round - bCZ >= GameConstants.CAPTURE_ROUND_DELAY) {
