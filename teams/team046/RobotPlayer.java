@@ -12,8 +12,6 @@ public class RobotPlayer {
     private static int buildChannelX = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int buildChannelY = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int buildChannelZ = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int defendChannelX = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int defendChannelY = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int topSecretResearchChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
@@ -63,18 +61,16 @@ public class RobotPlayer {
                     rc.broadcast(buildChannelZ, 0);
                     targetLoc = setBuildTarget(hqLoc);
                 }
+                else if (round > 50 && !rc.hasUpgrade(Upgrade.DEFUSION)) {
+                    rc.researchUpgrade(Upgrade.DEFUSION);
+                    return;
+                }
+                else if (round > 100 && !rc.hasUpgrade(Upgrade.FUSION)) {
+                    rc.researchUpgrade(Upgrade.FUSION);
+                    return;
+                }
                 else {
-                    // Research upgrades
-                    if (!rc.hasUpgrade(Upgrade.FUSION)) {
-                        rc.researchUpgrade(Upgrade.FUSION);
-                        return;
-                    } else if (!rc.hasUpgrade(Upgrade.DEFUSION)) {
-                        rc.researchUpgrade(Upgrade.DEFUSION);
-                        return;
-                    }
-                    else {
-                        targetLoc = rc.senseEnemyHQLocation();
-                    }
+                    targetLoc = rc.senseEnemyHQLocation();
                 }
             }
 
@@ -100,16 +96,13 @@ public class RobotPlayer {
             if (bCZ == 0 & rc.senseCaptureCost() < power) {
                 targetLoc = new MapLocation(rc.readBroadcast(buildChannelX), rc.readBroadcast(buildChannelY));
                 if (rLoc.equals(targetLoc)) {
-                    rc.captureEncampment(RobotType.MEDBAY);
-                    //rc.broadcast(defendChannelX, targetLoc.x);
-                    //rc.broadcast(defendChannelY, targetLoc.y);
+                    rc.captureEncampment(RobotType.SUPPLIER);
                     rc.broadcast(buildChannelZ, round);
                     return;
                 }
 
             }
             else {
-                //targetLoc = new MapLocation(rc.readBroadcast(defendChannelX), rc.readBroadcast(defendChannelY));
                 targetLoc = rc.senseEnemyHQLocation();
             }
 
@@ -131,7 +124,7 @@ public class RobotPlayer {
     }
 
     private static MapLocation setBuildTarget(MapLocation hqLoc) throws GameActionException {
-        MapLocation targetLocs[] = rc.senseEncampmentSquares(hqLoc, 200, Team.NEUTRAL);
+        MapLocation targetLocs[] = rc.senseEncampmentSquares(hqLoc, 500, Team.NEUTRAL);
         MapLocation targetLoc;
 
         if (targetLocs.length > 0) {
