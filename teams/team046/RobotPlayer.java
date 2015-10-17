@@ -12,7 +12,6 @@ public class RobotPlayer {
     private static int buildChannelX = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int buildChannelY = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int buildChannelZ = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int topSecretResearchChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -33,6 +32,7 @@ public class RobotPlayer {
 			}
             catch (Exception e) {
 				e.printStackTrace();
+                break;
 			}
 		}
 	}
@@ -41,6 +41,7 @@ public class RobotPlayer {
         if (rc.isActive()) {
             MapLocation hqLoc = rc.getLocation();
             MapLocation targetLoc;
+            targetLoc = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
 
             // Check for a build objective
             int bCZ = rc.readBroadcast(buildChannelZ);
@@ -48,8 +49,7 @@ public class RobotPlayer {
             if (round == 0) {
                 targetLoc = setBuildTarget(hqLoc);
             }
-            else if (rc.readBroadcast(topSecretResearchChannel) == 1) {
-                rc.broadcast(topSecretResearchChannel, 0);
+            else if (power < 150) {
                 rc.researchUpgrade(Upgrade.NUKE);
                 return;
             }
@@ -69,9 +69,6 @@ public class RobotPlayer {
                     rc.researchUpgrade(Upgrade.FUSION);
                     return;
                 }
-                else {
-                    targetLoc = rc.senseEnemyHQLocation();
-                }
             }
 
             // Find an available spawn direction
@@ -80,8 +77,6 @@ public class RobotPlayer {
                 dir = dir.rotateRight();
             }
             rc.spawn(dir);
-
-            rc.broadcast(topSecretResearchChannel, 1);
         }
     }
 
@@ -89,6 +84,7 @@ public class RobotPlayer {
         if (rc.isActive()) {
             MapLocation rLoc = rc.getLocation();
             MapLocation targetLoc;
+            targetLoc = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
             MapLocation nextLoc;
 
             // Check for build objective
@@ -102,12 +98,15 @@ public class RobotPlayer {
                 }
 
             }
-            else {
-                targetLoc = rc.senseEnemyHQLocation();
-            }
 
             // Find an available movement direction
             Direction dir = rLoc.directionTo(targetLoc);
+            if (dir == Direction.NONE) {
+                return;
+            }
+            else if (dir == Direction.OMNI) {
+                dir = Direction.EAST;
+            }
             while (!rc.canMove(dir)) {
                 dir = dir.rotateRight();
             }
@@ -141,7 +140,7 @@ public class RobotPlayer {
             rc.broadcast(buildChannelY, targetLoc.y);
         }
         else {
-            targetLoc = rc.senseEnemyHQLocation();
+            targetLoc = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
             rc.broadcast(buildChannelX, 0);
             rc.broadcast(buildChannelY, 0);
             rc.broadcast(buildChannelZ, GameConstants.ROUND_MAX_LIMIT);
