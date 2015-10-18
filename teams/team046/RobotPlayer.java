@@ -56,7 +56,7 @@ public class RobotPlayer {
 
             // Find an available spawn direction
             for (Direction dir : Direction.values()) {
-                if (dir != Direction.NONE && dir != Direction.OMNI) {
+                if (dir != Direction.NONE && dir != Direction.OMNI && rc.canMove(dir)) {
                     rc.spawn(dir);
                     break;
                 }
