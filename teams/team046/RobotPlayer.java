@@ -47,6 +47,14 @@ public class RobotPlayer {
                 rc.researchUpgrade(Upgrade.DEFUSION);
                 return;
             }
+            else {
+                Robot[] meanies = rc.senseNearbyGameObjects(Robot.class, 25, rc.getTeam().opponent());
+                Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 25, rc.getTeam());
+                if (meanies.length > 0 && myBuddies.length > meanies.length + 5) {
+                    rc.researchUpgrade(Upgrade.NUKE);
+                    return;
+                }
+            }
 
             // Find an available spawn direction
             MapLocation hqLocation = rc.senseHQLocation();
