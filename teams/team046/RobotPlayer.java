@@ -10,7 +10,9 @@ public class RobotPlayer {
     private static int round;
     private static double power;
     private static MapLocation rallyPoint;
+    private static int supplierBuilderRobotID;
     private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int supplierBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -89,40 +91,81 @@ public class RobotPlayer {
             // Set default rally point
             MapLocation targetLoc = rallyPoint;
 
-            // Check for build objective
+            // Get the supplier builder robot ID (or zero)
             if (power > GameConstants.BROADCAST_READ_COST) {
-                if (rc.readBroadcast(zergRushChannel) == 1) {
-                    targetLoc = rc.senseEnemyHQLocation();
-                }
-                else {
-                    // Get scared
-                    Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 3, rc.getTeam().opponent());
-                    if (nearbyEnemies.length > 0) {
-                        return;
-                    }
-                }
-            }
-
-            // Find an available movement direction
-            Direction dir = rLoc.directionTo(targetLoc);
-            if (dir == Direction.NONE) {
-                return;
-            }
-            else if (dir == Direction.OMNI) {
-                dir = Direction.EAST;
-            }
-            while (!rc.canMove(dir)) {
-                dir = dir.rotateRight();
-            }
-
-            MapLocation nextLoc = rLoc.add(dir);
-
-            if (rc.senseMine(nextLoc) != null) {
-                rc.defuseMine(nextLoc);
+                supplierBuilderRobotID = rc.readBroadcast(supplierBuilderChannel);
+                power -= GameConstants.BROADCAST_READ_COST;
             }
             else {
-                rc.move(dir);
+                supplierBuilderRobotID = -1;
             }
+            if (supplierBuilderRobotID == 0) {
+                rc.broadcast(supplierBuilderChannel, rc.getRobot().getID());
+                supplierBuilderRobotID = rc.getRobot().getID();
+            }
+
+            // Check for zerg command
+            if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(zergRushChannel) == 1) {
+                targetLoc = rc.senseEnemyHQLocation();
+                power -= GameConstants.BROADCAST_READ_COST;
+            }
+            // Handle supplier builder robot (including movement)
+            else if (supplierBuilderRobotID == rc.getRobot().getID()) {
+                BuildSupplier(rLoc);
+                return;
+            }
+            else {
+                // Get scared
+                Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 3, rc.getTeam().opponent());
+                if (nearbyEnemies.length > 0) {
+                    return;
+                }
+            }
+
+            MoveRobot(rLoc, targetLoc);
+        }
+    }
+
+    private static void MoveRobot(MapLocation rLoc, MapLocation targetLoc) throws GameActionException {
+        Direction dir = rLoc.directionTo(targetLoc);
+        if (dir == Direction.NONE) {
+            return;
+        }
+        else if (dir == Direction.OMNI) {
+            dir = Direction.EAST;
+        }
+        while (!rc.canMove(dir)) {
+            dir = dir.rotateRight();
+        }
+
+        MapLocation nextLoc = rLoc.add(dir);
+
+        if (rc.senseMine(nextLoc) != null) {
+            rc.defuseMine(nextLoc);
+        }
+        else {
+            rc.move(dir);
+        }
+    }
+
+    private static void BuildSupplier(MapLocation rLoc) throws GameActionException {
+        if (rc.senseEncampmentSquare(rLoc)) {
+            rc.captureEncampment(RobotType.SUPPLIER);
+        }
+        else {
+            MapLocation encampmentSquares[] = rc.senseAllEncampmentSquares();
+            MapLocation targetLoc = encampmentSquares[0];
+            int closest = 1000;
+
+            for (MapLocation loc: encampmentSquares) {
+                int dist = rLoc.distanceSquaredTo(loc);
+                if (dist < closest) {
+                    targetLoc = loc;
+                    closest = dist;
+                }
+            }
+
+            MoveRobot(rLoc, targetLoc);
         }
     }
 
