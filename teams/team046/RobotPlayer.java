@@ -2,18 +2,27 @@ package team046;
 
 import battlecode.common.*;
 
+import java.util.Arrays;
+
 public class RobotPlayer {
 
     private static RobotController rc;
     private static int round;
     private static double power;
     private static MapLocation rallyPoint;
-
-    // LOL
     private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
+
+        // Set rally point
+        if (rallyPoint == null) {
+            MapLocation goodHQ = rc.senseHQLocation();
+            MapLocation badHQ = rc.senseEnemyHQLocation();
+            MapLocation midPoint = new MapLocation((badHQ.x + goodHQ.x) / 2, (badHQ.y + goodHQ.y) / 2);
+            MapLocation qPoint = new MapLocation((midPoint.x + goodHQ.x) / 2, (midPoint.y + goodHQ.y) / 2);
+            rallyPoint = new MapLocation((qPoint.x + goodHQ.x)/2, (qPoint.y + goodHQ.y)/2);
+        }
 
 		while (true) {
             try {
@@ -38,19 +47,28 @@ public class RobotPlayer {
 
     private static void HQ() throws GameActionException {
         if (rc.isActive()) {
+
+
+            //Robot[] friendlyRobots = rc.senseNearbyGameObjects(Robot.class, rallyPoint, 100, rc.getTeam());
+            //System.out.println(Arrays.deepToString(friendlyRobots));
+            //System.out.println(friendlyRobots.length);
             if (rc.senseEnemyNukeHalfDone()) {
                 rc.broadcast(zergRushChannel, 1);
             }
-            else if (round > 750  && !rc.hasUpgrade(Upgrade.VISION)) {
-                rc.researchUpgrade(Upgrade.VISION);
+           /* else if (friendlyRobots.length >= 15) {
+                rc.researchUpgrade(Upgrade.NUKE);
+                return;
+            }*/
+            else if (round > 750  && !rc.hasUpgrade(Upgrade.FUSION)) {
+                rc.researchUpgrade(Upgrade.FUSION);
                 return;
             }
             else if (round > 1000  && !rc.hasUpgrade(Upgrade.DEFUSION)) {
                 rc.researchUpgrade(Upgrade.DEFUSION);
                 return;
             }
-            else if (round > 1250 && !rc.hasUpgrade(Upgrade.FUSION)) {
-                rc.researchUpgrade(Upgrade.FUSION);
+            else if (round > 1250 && !rc.hasUpgrade(Upgrade.VISION)) {
+                rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
 
@@ -68,15 +86,8 @@ public class RobotPlayer {
         if (rc.isActive()) {
             MapLocation rLoc = rc.getLocation();
 
-            // Set default to halfway between bases
-            if (rallyPoint == null) {
-                MapLocation goodHQ = rc.senseHQLocation();
-                MapLocation badHQ = rc.senseEnemyHQLocation();
-                MapLocation midPoint = new MapLocation((badHQ.x + goodHQ.x) / 2, (badHQ.y + goodHQ.y) / 2);
-                rallyPoint = new MapLocation((midPoint.x + goodHQ.x)/2, (midPoint.y + goodHQ.y)/2);
-            }
+            // Set default rally point
             MapLocation targetLoc = rallyPoint;
-
 
             // Check for build objective
             if (power > GameConstants.BROADCAST_READ_COST) {
