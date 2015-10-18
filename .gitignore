@@ -1,3 +1,5 @@
+/bc.conf
+/replays
 bin/
 *.DS_Store*
 .idea/*

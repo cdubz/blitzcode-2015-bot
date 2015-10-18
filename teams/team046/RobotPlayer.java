@@ -10,7 +10,6 @@ public class RobotPlayer {
     private static int round;
     private static double power;
     private static MapLocation rallyPoint;
-    private static int supplierBuilderRobotID;
     private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int supplierBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
@@ -49,28 +48,28 @@ public class RobotPlayer {
 
     private static void HQ() throws GameActionException {
         if (rc.isActive()) {
-            //Robot[] friendlyRobots = rc.senseNearbyGameObjects(Robot.class, rallyPoint, 100, rc.getTeam());
-            //System.out.println(Arrays.deepToString(friendlyRobots));
-            //System.out.println(friendlyRobots.length);
             if (rc.senseEnemyNukeHalfDone()) {
                 rc.broadcast(zergRushChannel, 1);
             }
-           /* else if (friendlyRobots.length >= 15) {
-                rc.researchUpgrade(Upgrade.NUKE);
-                return;
-            }*/
-            else if (round > 750  && !rc.hasUpgrade(Upgrade.FUSION)) {
+            else if (round > 250  && !rc.hasUpgrade(Upgrade.FUSION)) {
                 rc.researchUpgrade(Upgrade.FUSION);
                 return;
             }
-            else if (round > 1000  && !rc.hasUpgrade(Upgrade.DEFUSION)) {
+            else if (round > 500  && !rc.hasUpgrade(Upgrade.DEFUSION)) {
                 rc.researchUpgrade(Upgrade.DEFUSION);
                 return;
             }
-            else if (round > 1250 && !rc.hasUpgrade(Upgrade.VISION)) {
+            /*else if (round > 750 && !rc.hasUpgrade(Upgrade.VISION)) {
                 rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
+            else {
+                Robot[] friendlyRobots = rc.senseNearbyGameObjects(Robot.class, rallyPoint, 100, rc.getTeam());
+                if  (friendlyRobots.length >= 16) {
+                    rc.researchUpgrade(Upgrade.NUKE);
+                    return;
+                }
+            }*/
 
             // Find an available spawn direction
             MapLocation hqLocation = rc.senseHQLocation();
@@ -89,6 +88,7 @@ public class RobotPlayer {
 
     private static void Soldier() throws GameActionException {
         if (rc.isActive()) {
+            int supplierBuilderRobotID;
             MapLocation rLoc = rc.getLocation();
 
             // Set default rally point
