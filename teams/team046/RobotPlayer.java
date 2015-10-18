@@ -49,8 +49,6 @@ public class RobotPlayer {
 
     private static void HQ() throws GameActionException {
         if (rc.isActive()) {
-
-
             //Robot[] friendlyRobots = rc.senseNearbyGameObjects(Robot.class, rallyPoint, 100, rc.getTeam());
             //System.out.println(Arrays.deepToString(friendlyRobots));
             //System.out.println(friendlyRobots.length);
@@ -75,10 +73,15 @@ public class RobotPlayer {
             }
 
             // Find an available spawn direction
+            MapLocation hqLocation = rc.senseHQLocation();
+            MapLocation nextLoc;
             for (Direction dir : Direction.values()) {
                 if (dir != Direction.NONE && dir != Direction.OMNI && rc.canMove(dir)) {
-                    rc.spawn(dir);
-                    break;
+                    nextLoc = hqLocation.add(dir);
+                    if (rc.senseMine(nextLoc) == null) {
+                        rc.spawn(dir);
+                        break;
+                    }
                 }
             }
         }
