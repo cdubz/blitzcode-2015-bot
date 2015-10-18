@@ -1,4 +1,4 @@
-package bortrand44;
+package rushbot;
 
 import battlecode.common.*;
 
