@@ -2,9 +2,6 @@ package team046;
 
 import battlecode.common.*;
 
-import java.util.List;
-import java.util.ArrayList;
-
 public class RobotPlayer {
 
     private static RobotController rc;
@@ -113,10 +110,11 @@ public class RobotPlayer {
                     targetLoc = new MapLocation(goodHQ.x - 3, goodHQ.y - 3);
                 }
                 else {
-                    List<MapLocation> rallyPoints = new ArrayList<>();
-                    rallyPoints.add(new MapLocation(goodHQ.x + randomWithRange(0,1), goodHQ.y + randomWithRange(0,1)));
-                    rallyPoints.add(new MapLocation(goodHQ.x - randomWithRange(0,1), goodHQ.y - randomWithRange(0,1)));
-                    targetLoc = rallyPoints.get(randomWithRange(0, rallyPoints.size() - 1));
+                    MapLocation rallyPoints[] = {
+                        new MapLocation(goodHQ.x + randomWithRange(0,1), goodHQ.y + randomWithRange(0,1)),
+                        new MapLocation(goodHQ.x - randomWithRange(0,1), goodHQ.y - randomWithRange(0,1))
+                    };
+                    targetLoc = rallyPoints[randomWithRange(0, rallyPoints.length - 1)];
                 }
             }
 
