@@ -177,7 +177,7 @@ public class RobotPlayer {
     private static void spamBroadcast() throws GameActionException {
         while (power > GameConstants.BROADCAST_MAX_CHANNELS * GameConstants.BROADCAST_READ_COST) {
             for (int i = 0; i <= GameConstants.BROADCAST_MAX_CHANNELS; i++) {
-                if (i != supplierBuilderChannel
+                if (i != zergRushChannel
                         && i != supplierBuilderChannel
                         && rc.readBroadcast(i) != 0
                         && power - GameConstants.BROADCAST_READ_COST > GameConstants.BROADCAST_SEND_COST) {
