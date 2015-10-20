@@ -8,6 +8,7 @@ public class RobotPlayer {
     private static int round;
     private static double power;
     private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int zergRushCode = randomWithRange(2, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int supplierBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
@@ -37,7 +38,7 @@ public class RobotPlayer {
     private static void HQ() throws GameActionException {
         if (rc.isActive()) {
             if (rc.senseEnemyNukeHalfDone()) {
-                rc.broadcast(zergRushChannel, 1);
+                rc.broadcast(zergRushChannel, zergRushCode);
             }
             else if (round > 250  && !rc.hasUpgrade(Upgrade.FUSION)) {
                 rc.researchUpgrade(Upgrade.FUSION);
@@ -91,7 +92,7 @@ public class RobotPlayer {
             }
 
             // Check for zerg command
-            if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(zergRushChannel) == 1) {
+            if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(zergRushChannel) == zergRushCode) {
                 targetLoc = rc.senseEnemyHQLocation();
                 power -= GameConstants.BROADCAST_READ_COST;
             }
