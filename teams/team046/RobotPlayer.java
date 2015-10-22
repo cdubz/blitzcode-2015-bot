@@ -37,15 +37,15 @@ public class RobotPlayer {
 
     private static void HQ() throws GameActionException {
         if (rc.isActive()) {
-            if (rc.senseEnemyNukeHalfDone()) {
+            if (rc.senseEnemyNukeHalfDone() && rc.readBroadcast(zergRushChannel) != zergRushCode) {
                 rc.broadcast(zergRushChannel, zergRushCode);
             }
             else if (round > 250  && !rc.hasUpgrade(Upgrade.FUSION)) {
                 rc.researchUpgrade(Upgrade.FUSION);
                 return;
             }
-            else if (round > 500  && !rc.hasUpgrade(Upgrade.DEFUSION)) {
-                rc.researchUpgrade(Upgrade.DEFUSION);
+            else if (round > 500  && !rc.hasUpgrade(Upgrade.VISION)) {
+                rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
             else {
@@ -113,15 +113,15 @@ public class RobotPlayer {
             if (targetLoc == null) {
                 MapLocation goodHQ = rc.senseHQLocation();
                 if (goodHQ.x <= 1) {
-                    targetLoc = new MapLocation(goodHQ.x + 3, goodHQ.y + 3);
+                    targetLoc = new MapLocation(goodHQ.x + 3, goodHQ.y);
                 }
                 else if (goodHQ.x >= rc.getMapWidth() - 1) {
-                    targetLoc = new MapLocation(goodHQ.x - 3, goodHQ.y - 3);
+                    targetLoc = new MapLocation(goodHQ.x - 3, goodHQ.y);
                 }
                 else {
                     MapLocation rallyPoints[] = {
-                        new MapLocation(goodHQ.x + randomWithRange(0,1), goodHQ.y + randomWithRange(0,1)),
-                        new MapLocation(goodHQ.x - randomWithRange(0,1), goodHQ.y - randomWithRange(0,1))
+                        new MapLocation(goodHQ.x + randomWithRange(1,2), goodHQ.y + randomWithRange(1,2)),
+                        new MapLocation(goodHQ.x - randomWithRange(1,2), goodHQ.y - randomWithRange(1,2))
                     };
                     targetLoc = rallyPoints[randomWithRange(0, rallyPoints.length - 1)];
                 }
