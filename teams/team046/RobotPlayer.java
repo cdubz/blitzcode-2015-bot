@@ -9,7 +9,9 @@ public class RobotPlayer {
     private static double power;
     private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int zergRushCode = randomWithRange(2, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int supplierBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int EncampmentBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int EncampmentSearchStartedChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int FirstSupplierBuilt = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -74,21 +76,29 @@ public class RobotPlayer {
 
     private static void Soldier() throws GameActionException {
         if (rc.isActive()) {
-            int supplierBuilderRobotID;
+            int EncampmentBuilderRobotID;
+            int EncampmentSearchStartedRound;
             MapLocation rLoc = rc.getLocation();
             MapLocation targetLoc = null;
 
-            // Get the supplier builder robot ID (or zero)
-            if (power > GameConstants.BROADCAST_READ_COST) {
-                supplierBuilderRobotID = rc.readBroadcast(supplierBuilderChannel);
-                power -= GameConstants.BROADCAST_READ_COST;
+            // Get the Encampment builder robot ID (or zero)
+            if (power > GameConstants.BROADCAST_READ_COST * 2) {
+                EncampmentBuilderRobotID = rc.readBroadcast(EncampmentBuilderChannel);
+                EncampmentSearchStartedRound = rc.readBroadcast(EncampmentSearchStartedChannel);
+                power -= GameConstants.BROADCAST_READ_COST * 2;
             }
             else {
-                supplierBuilderRobotID = -1;
+                EncampmentBuilderRobotID = -1;
+                EncampmentSearchStartedRound = 0;
             }
-            if (supplierBuilderRobotID == 0) {
-                rc.broadcast(supplierBuilderChannel, rc.getRobot().getID());
-                supplierBuilderRobotID = rc.getRobot().getID();
+            if (EncampmentBuilderRobotID == 0
+                    || EncampmentSearchStartedRound + GameConstants.CAPTURE_ROUND_DELAY * 2 < round) {
+                rc.broadcast(EncampmentBuilderChannel, rc.getRobot().getID());
+                if (power > GameConstants.BROADCAST_SEND_COST) {
+                    rc.broadcast(EncampmentSearchStartedChannel, round);
+                    power -= GameConstants.BROADCAST_SEND_COST * 2;
+                }
+                EncampmentBuilderRobotID = rc.getRobot().getID();
             }
 
             // Check for zerg command
@@ -96,9 +106,9 @@ public class RobotPlayer {
                 targetLoc = rc.senseEnemyHQLocation();
                 power -= GameConstants.BROADCAST_READ_COST;
             }
-            // Handle supplier builder robot (including movement)
-            else if (supplierBuilderRobotID == rc.getRobot().getID()) {
-                BuildSupplier(rLoc);
+            // Handle Encampment builder robot (including movement)
+            else if (EncampmentBuilderRobotID == rc.getRobot().getID()) {
+                BuildEncampment(rLoc);
                 return;
             }
             else {
@@ -153,18 +163,33 @@ public class RobotPlayer {
         }
     }
 
-    private static void BuildSupplier(MapLocation rLoc) throws GameActionException {
+    private static void BuildEncampment(MapLocation rLoc) throws GameActionException {
         if (rc.senseEncampmentSquare(rLoc)) {
-            rc.captureEncampment(RobotType.GENERATOR);
+            if (power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST
+                    && rc.readBroadcast(FirstSupplierBuilt) == 0) {
+                rc.captureEncampment(RobotType.SUPPLIER);
+                rc.broadcast(FirstSupplierBuilt, 1);
+                power -= GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST;
+            }
+            else {
+                rc.captureEncampment(RobotType.GENERATOR);
+            }
         }
         else {
             MapLocation encampmentSquares[] = rc.senseAllEncampmentSquares();
+            MapLocation goodEncampments[] = rc.senseAlliedEncampmentSquares();
             MapLocation targetLoc = encampmentSquares[0];
             int closest = 1000;
 
+            checkLocations:
             for (MapLocation loc: encampmentSquares) {
                 int dist = rLoc.distanceSquaredTo(loc);
                 if (dist < closest) {
+                    for (MapLocation goodLoc: goodEncampments) {
+                        if (goodLoc.equals(loc)) {
+                            continue checkLocations;
+                        }
+                    }
                     targetLoc = loc;
                     closest = dist;
                 }
@@ -178,7 +203,7 @@ public class RobotPlayer {
         if (power > GameConstants.BROADCAST_MAX_CHANNELS * GameConstants.BROADCAST_READ_COST) {
             for (int i = 0; i <= GameConstants.BROADCAST_MAX_CHANNELS; i++) {
                 if (i != zergRushChannel
-                        && i != supplierBuilderChannel
+                        && i != EncampmentBuilderChannel
                         && rc.readBroadcast(i) != 0
                         && power - GameConstants.BROADCAST_READ_COST > GameConstants.BROADCAST_SEND_COST) {
                     System.out.println(String.valueOf(i));
