@@ -155,7 +155,7 @@ public class RobotPlayer {
 
     private static void BuildSupplier(MapLocation rLoc) throws GameActionException {
         if (rc.senseEncampmentSquare(rLoc)) {
-            rc.captureEncampment(RobotType.SUPPLIER);
+            rc.captureEncampment(RobotType.GENERATOR);
         }
         else {
             MapLocation encampmentSquares[] = rc.senseAllEncampmentSquares();
