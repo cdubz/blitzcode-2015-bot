@@ -76,7 +76,7 @@ public class RobotPlayer {
         if (rc.isActive()) {
             int supplierBuilderRobotID;
             MapLocation rLoc = rc.getLocation();
-            MapLocation targetLoc = null;
+            MapLocation targetLoc;
 
             // Handle supplier builder robot (including movement)
             if (power > GameConstants.BROADCAST_READ_COST * 2 + GameConstants.BROADCAST_SEND_COST && rc.readBroadcast(supplierBuilt) == 0) {
@@ -95,29 +95,28 @@ public class RobotPlayer {
                 targetLoc = rc.senseEnemyHQLocation();
             }
             else {
-                // Get scared
                 Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 3, rc.getTeam().opponent());
                 if (nearbyEnemies.length > 0) {
                     return;
                 }
-            }
 
-            // Set rally point
-            if (targetLoc == null) {
+                MapLocation rudeHQ = rc.senseEnemyHQLocation();
                 MapLocation goodHQ = rc.senseHQLocation();
-                if (goodHQ.x <= 1) {
-                    targetLoc = new MapLocation(goodHQ.x + 3, goodHQ.y);
+                Direction dir = rudeHQ.directionTo(goodHQ);
+                int xm = 1, ym = 1;
+
+                switch (dir) {
+                    case NORTH: xm = 0; ym = 2; break;
+                    case NORTH_EAST: xm = -2; ym = 2; break;
+                    case EAST: xm = -2; ym = 0; break;
+                    case SOUTH_EAST: xm = -2; ym = -2; break;
+                    case SOUTH: xm = 0; ym = -2; break;
+                    case SOUTH_WEST: xm = -2; ym = -2; break;
+                    case WEST: xm = -2; ym = 0; break;
+                    case NORTH_WEST: xm = 2; ym = 2; break;
                 }
-                else if (goodHQ.x >= rc.getMapWidth() - 1) {
-                    targetLoc = new MapLocation(goodHQ.x - 3, goodHQ.y);
-                }
-                else {
-                    MapLocation rallyPoints[] = {
-                        new MapLocation(goodHQ.x + randomWithRange(1,2), goodHQ.y + randomWithRange(1,2)),
-                        new MapLocation(goodHQ.x - randomWithRange(1,2), goodHQ.y - randomWithRange(1,2))
-                    };
-                    targetLoc = rallyPoints[randomWithRange(0, rallyPoints.length - 1)];
-                }
+
+                targetLoc = new MapLocation(goodHQ.x + xm, goodHQ.y + ym);
             }
 
             MoveRobot(rLoc, targetLoc);
