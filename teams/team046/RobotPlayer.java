@@ -109,14 +109,14 @@ public class RobotPlayer {
                 int xm = 1, ym = 1;
 
                 switch (dir) {
-                    case NORTH: xm = 0; ym = 4; break;
-                    case NORTH_EAST: xm = 4; ym = 4; break;
-                    case EAST: xm = 4; ym = 0; break;
-                    case SOUTH_EAST: xm = 4; ym = -4; break;
-                    case SOUTH: xm = 0; ym = -2; break;
-                    case SOUTH_WEST: xm = -4; ym = -4; break;
-                    case WEST: xm = -4; ym = 0; break;
-                    case NORTH_WEST: xm = -4; ym = 4; break;
+                    case NORTH: xm = 0; ym = -2; break;
+                    case NORTH_EAST: xm = 2; ym = -2; break;
+                    case EAST: xm = 2; ym = 0; break;
+                    case SOUTH_EAST: xm = 2; ym = 2; break;
+                    case SOUTH: xm = 0; ym = 2; break;
+                    case SOUTH_WEST: xm = -2; ym = 2; break;
+                    case WEST: xm = -2; ym = 0; break;
+                    case NORTH_WEST: xm = -2; ym = -2; break;
                 }
 
                 targetLoc = new MapLocation(goodHQ.x + xm, goodHQ.y + ym);
