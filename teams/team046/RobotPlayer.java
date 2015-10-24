@@ -51,7 +51,6 @@ public class RobotPlayer {
                 return;
             }
             else {
-                //Robot[] meanies = rc.senseNearbyGameObjects(Robot.class, 14, rc.getTeam().opponent());
                 Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 14, rc.getTeam());
                 if (round > 500 && myBuddies.length > 20) {
                     rc.researchUpgrade(Upgrade.NUKE);
@@ -196,22 +195,6 @@ public class RobotPlayer {
             }
 
             MoveRobot(rLoc, targetLoc);
-        }
-    }
-
-    private static void spamBroadcast() throws GameActionException {
-        if (power > GameConstants.BROADCAST_MAX_CHANNELS * GameConstants.BROADCAST_READ_COST) {
-            for (int i = 0; i <= GameConstants.BROADCAST_MAX_CHANNELS; i++) {
-                if (i != zergRushChannel
-                        && i != EncampmentBuilderChannel
-                        && rc.readBroadcast(i) != 0
-                        && power - GameConstants.BROADCAST_READ_COST > GameConstants.BROADCAST_SEND_COST) {
-                    System.out.println(String.valueOf(i));
-                    rc.broadcast(i, 0);
-                    power -= GameConstants.BROADCAST_SEND_COST;
-                }
-                power -= GameConstants.BROADCAST_READ_COST;
-            }
         }
     }
 
