@@ -96,7 +96,7 @@ public class RobotPlayer {
             }
             else {
                 // Get scared
-                Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 3, rc.getTeam().opponent());
+                Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 5, rc.getTeam().opponent());
                 if (nearbyEnemies.length > 0) {
                     return;
                 }
