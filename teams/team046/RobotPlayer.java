@@ -7,9 +7,8 @@ public class RobotPlayer {
     private static RobotController rc;
     private static int round;
     private static double power;
-    private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int zergRushCode = randomWithRange(2, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int supplierBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int zergRushChannel = 10104;
+    private static int zergRushCode = 31337;
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -75,6 +74,7 @@ public class RobotPlayer {
         if (rc.isActive()) {
             MapLocation rLoc = rc.getLocation();
             MapLocation targetLoc;
+            int supplierBuilderChannel = 10111;
             int SupplierBuilderID = -1;
 
             if (power > GameConstants.BROADCAST_READ_COST) {
@@ -167,10 +167,5 @@ public class RobotPlayer {
             rc.setIndicatorString(2, String.valueOf(targetLoc));
             MoveRobot(rLoc, targetLoc);
         }
-    }
-
-    private static int randomWithRange(int min, int max) {
-        int range = Math.abs(max - min) + 1;
-        return (int)(Math.random() * range) + (min <= max ? min : max);
     }
 }
