@@ -50,7 +50,6 @@ public class RobotPlayer {
                 return;
             }
             else {
-                //Robot[] meanies = rc.senseNearbyGameObjects(Robot.class, 14, rc.getTeam().opponent());
                 Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 14, rc.getTeam());
                 if (round > 500 && myBuddies.length > 20) {
                     rc.researchUpgrade(Upgrade.NUKE);
