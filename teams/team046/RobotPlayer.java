@@ -10,7 +10,6 @@ public class RobotPlayer {
     private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int zergRushCode = randomWithRange(2, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int supplierBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int supplierBuilt = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -50,7 +49,7 @@ public class RobotPlayer {
                 return;
             }
             else {
-                Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 14, rc.getTeam());
+                Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam());
                 if (round > 500 && myBuddies.length > 20) {
                     rc.researchUpgrade(Upgrade.NUKE);
                     return;
@@ -74,20 +73,24 @@ public class RobotPlayer {
 
     private static void Soldier() throws GameActionException {
         if (rc.isActive()) {
-            int supplierBuilderRobotID;
             MapLocation rLoc = rc.getLocation();
             MapLocation targetLoc;
+            int SupplierBuilderID = -1;
+
+            if (power > GameConstants.BROADCAST_READ_COST) {
+                SupplierBuilderID = rc.readBroadcast(supplierBuilderChannel);
+                power -= GameConstants.BROADCAST_READ_COST;
+            }
 
             // Handle supplier builder robot (including movement)
-            if (power > GameConstants.BROADCAST_READ_COST * 2 + GameConstants.BROADCAST_SEND_COST && rc.readBroadcast(supplierBuilt) == 0) {
-                supplierBuilderRobotID = rc.readBroadcast(supplierBuilderChannel);
-                power -= GameConstants.BROADCAST_READ_COST * 2;
-                if (supplierBuilderRobotID == 0) {
+            if (power > GameConstants.BROADCAST_SEND_COST
+                    && (SupplierBuilderID == 0 || SupplierBuilderID == rc.getRobot().getID())) {
+                if (SupplierBuilderID == 0) {
                     rc.broadcast(supplierBuilderChannel, rc.getRobot().getID());
                     power -= GameConstants.BROADCAST_SEND_COST;
-                    BuildSupplier(rLoc);
-                    return;
                 }
+                BuildSupplier(rLoc);
+                return;
             }
 
             // Check for zerg command
@@ -161,7 +164,7 @@ public class RobotPlayer {
                     closest = dist;
                 }
             }
-
+            rc.setIndicatorString(2, String.valueOf(targetLoc));
             MoveRobot(rLoc, targetLoc);
         }
     }
