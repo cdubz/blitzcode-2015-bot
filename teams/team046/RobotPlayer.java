@@ -10,6 +10,7 @@ public class RobotPlayer {
     private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int zergRushCode = randomWithRange(2, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int supplierBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int supplierBuilt = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -78,28 +79,21 @@ public class RobotPlayer {
             MapLocation rLoc = rc.getLocation();
             MapLocation targetLoc = null;
 
-            // Get the supplier builder robot ID (or zero)
-            if (power > GameConstants.BROADCAST_READ_COST) {
+            // Handle supplier builder robot (including movement)
+            if (power > GameConstants.BROADCAST_READ_COST * 2 + GameConstants.BROADCAST_SEND_COST && rc.readBroadcast(supplierBuilt) == 0) {
                 supplierBuilderRobotID = rc.readBroadcast(supplierBuilderChannel);
-                power -= GameConstants.BROADCAST_READ_COST;
-            }
-            else {
-                supplierBuilderRobotID = -1;
-            }
-            if (supplierBuilderRobotID == 0) {
-                rc.broadcast(supplierBuilderChannel, rc.getRobot().getID());
-                supplierBuilderRobotID = rc.getRobot().getID();
+                power -= GameConstants.BROADCAST_READ_COST * 2;
+                if (supplierBuilderRobotID == 0) {
+                    rc.broadcast(supplierBuilderChannel, rc.getRobot().getID());
+                    power -= GameConstants.BROADCAST_SEND_COST;
+                    BuildSupplier(rLoc);
+                    return;
+                }
             }
 
             // Check for zerg command
             if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(zergRushChannel) == zergRushCode) {
                 targetLoc = rc.senseEnemyHQLocation();
-                power -= GameConstants.BROADCAST_READ_COST;
-            }
-            // Handle supplier builder robot (including movement)
-            else if (supplierBuilderRobotID == rc.getRobot().getID()) {
-                BuildSupplier(rLoc);
-                return;
             }
             else {
                 // Get scared
