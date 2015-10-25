@@ -132,7 +132,7 @@ public class RobotPlayer {
                         case SOUTH: xm = 0; ym = 3; break;
                         case SOUTH_WEST: xm = -3; ym = 3; break;
                         case WEST: xm = -3; ym = 0; break;
-                        case NORTH_WEST: xm = -3; ym = 3; break;
+                        case NORTH_WEST: xm = -3; ym = -3; break;
                     }
 
                     targetLoc = new MapLocation(goodHQ.x + xm, goodHQ.y + ym);
@@ -159,7 +159,13 @@ public class RobotPlayer {
             dir = Direction.EAST;
         }
         while (!rc.canMove(dir)) {
-            dir = dir.rotateRight();
+            if ((targetLoc.x == 0 && dir == Direction.SOUTH)
+                    || targetLoc.x == rc.getMapWidth() - 1 && dir == Direction.NORTH) {
+                dir = dir.rotateLeft();
+            }
+            else {
+                dir = dir.rotateRight();
+            }
         }
 
         MapLocation nextLoc = rLoc.add(dir);
