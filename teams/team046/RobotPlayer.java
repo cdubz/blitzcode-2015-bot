@@ -121,11 +121,23 @@ public class RobotPlayer {
             // Set rally point
             if (targetLoc == null) {
                 MapLocation goodHQ = rc.senseHQLocation();
-                if (goodHQ.x <= 1) {
-                    targetLoc = new MapLocation(goodHQ.x + 3, goodHQ.y);
-                }
-                else if (goodHQ.x >= rc.getMapWidth() - 1) {
-                    targetLoc = new MapLocation(goodHQ.x - 3, goodHQ.y);
+                if (goodHQ.x <= 2 || goodHQ.x >= rc.getMapWidth() - 2) {
+                    MapLocation rudeHQ = rc.senseEnemyHQLocation();
+                    Direction dir = goodHQ.directionTo(rudeHQ);
+                    int xm = 1, ym = 1;
+
+                    switch (dir) {
+                        case NORTH: xm = 0; ym = -3; break;
+                        case NORTH_EAST: xm = 3; ym = -3; break;
+                        case EAST: xm = 3; ym = 0; break;
+                        case SOUTH_EAST: xm = 3; ym = 3; break;
+                        case SOUTH: xm = 0; ym = 3; break;
+                        case SOUTH_WEST: xm = -3; ym = 3; break;
+                        case WEST: xm = -3; ym = 0; break;
+                        case NORTH_WEST: xm = -3; ym = 3; break;
+                    }
+
+                    targetLoc = new MapLocation(goodHQ.x + xm, goodHQ.y + ym);
                 }
                 else {
                     MapLocation rallyPoints[] = {
