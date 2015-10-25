@@ -90,13 +90,11 @@ public class RobotPlayer {
                 EncampmentBuilderRobotID = -1;
                 EncampmentSearchStartedRound = 0;
             }
-            if (EncampmentBuilderRobotID == 0
-                    || EncampmentSearchStartedRound + GameConstants.CAPTURE_ROUND_DELAY * 2 < round) {
+            if (power > GameConstants.BROADCAST_SEND_COST * 2 && (EncampmentBuilderRobotID == 0
+                    || EncampmentSearchStartedRound + GameConstants.CAPTURE_ROUND_DELAY * 2 < round)) {
                 rc.broadcast(EncampmentBuilderChannel, rc.getRobot().getID());
-                if (power > GameConstants.BROADCAST_SEND_COST) {
-                    rc.broadcast(EncampmentSearchStartedChannel, round);
-                    power -= GameConstants.BROADCAST_SEND_COST * 2;
-                }
+                rc.broadcast(EncampmentSearchStartedChannel, round);
+                power -= GameConstants.BROADCAST_SEND_COST * 2;
                 EncampmentBuilderRobotID = rc.getRobot().getID();
             }
 
