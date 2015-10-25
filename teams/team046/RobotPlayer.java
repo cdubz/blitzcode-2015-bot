@@ -50,13 +50,13 @@ public class RobotPlayer {
                 rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
-            else {
+            /*else {
                 Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam());
                 if (round > 500 && myBuddies.length > 15) {
                     rc.researchUpgrade(Upgrade.NUKE);
                     return;
                 }
-            }
+            }*/
 
             // Find an available spawn direction
             MapLocation hqLocation = rc.senseHQLocation();
