@@ -11,7 +11,7 @@ public class RobotPlayer {
     private static int zergRushCode = randomWithRange(2, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int EncampmentBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int EncampmentSearchStartedChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int FirstSupplierBuilt = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int SupplierBuilt = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -52,7 +52,7 @@ public class RobotPlayer {
             }
             else if (power > 250 || round > 1500) {
                 Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam());
-                if (myBuddies.length > 30) {
+                if (myBuddies.length > 25) {
                     rc.researchUpgrade(Upgrade.NUKE);
                     return;
                 }
@@ -181,13 +181,17 @@ public class RobotPlayer {
     private static void BuildEncampment(MapLocation rLoc) throws GameActionException {
         if (rc.senseEncampmentSquare(rLoc)) {
             if (power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST
-                    && rc.readBroadcast(FirstSupplierBuilt) == 0) {
+                    && rc.readBroadcast(SupplierBuilt) == 0) {
                 rc.captureEncampment(RobotType.SUPPLIER);
-                rc.broadcast(FirstSupplierBuilt, 1);
+                rc.broadcast(SupplierBuilt, 1);
                 power -= GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST;
             }
             else {
                 rc.captureEncampment(RobotType.GENERATOR);
+                if (power > GameConstants.BROADCAST_SEND_COST) {
+                    rc.broadcast(SupplierBuilt, 0);
+                    power -= GameConstants.BROADCAST_SEND_COST;
+                }
             }
         }
         else {
