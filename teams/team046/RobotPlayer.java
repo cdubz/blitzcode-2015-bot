@@ -64,7 +64,8 @@ public class RobotPlayer {
             for (Direction dir : Direction.values()) {
                 if (dir != Direction.NONE && dir != Direction.OMNI && rc.canMove(dir)) {
                     nextLoc = hqLocation.add(dir);
-                    if (rc.senseMine(nextLoc) == null) {
+                    Team mine = rc.senseMine(nextLoc);
+                    if (mine == null || mine == rc.getTeam()) {
                         rc.spawn(dir);
                         break;
                     }
@@ -106,6 +107,11 @@ public class RobotPlayer {
             // Handle Encampment builder robot (including movement)
             else if (EncampmentBuilderRobotID == rc.getRobot().getID()) {
                 BuildEncampment(rLoc);
+                return;
+            }
+            // Check for and plant mines
+            else if (rc.senseMine(rLoc) == null) {
+                rc.layMine();
                 return;
             }
             else {
@@ -169,8 +175,9 @@ public class RobotPlayer {
         }
 
         MapLocation nextLoc = rLoc.add(dir);
+        Team mine = rc.senseMine(nextLoc);
 
-        if (rc.senseMine(nextLoc) != null) {
+        if (mine == Team.NEUTRAL || mine == rc.getTeam().opponent()) {
             rc.defuseMine(nextLoc);
         }
         else {
@@ -179,7 +186,7 @@ public class RobotPlayer {
     }
 
     private static void BuildEncampment(MapLocation rLoc) throws GameActionException {
-        if (rc.senseEncampmentSquare(rLoc)) {
+        if (power > rc.senseCaptureCost() && rc.senseEncampmentSquare(rLoc)) {
             if (power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST
                     && rc.readBroadcast(SupplierBuilt) == 0) {
                 rc.captureEncampment(RobotType.SUPPLIER);
