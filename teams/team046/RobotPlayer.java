@@ -27,6 +27,9 @@ public class RobotPlayer {
                 else if (rc.getType() == RobotType.SOLDIER) {
                     Soldier();
 				}
+                else if (rc.getType() == RobotType.ARTILLERY) {
+                    Artillery();
+                }
 
 				rc.yield();
 			}
@@ -160,6 +163,18 @@ public class RobotPlayer {
         }
     }
 
+    private static void Artillery() throws GameActionException {
+        if (rc.isActive()) {
+            Robot[] baddies = rc.senseNearbyGameObjects(Robot.class, 63, rc.getTeam().opponent());
+            if (baddies.length > 0) {
+                RobotInfo baddieInfo = rc.senseRobotInfo(baddies[0]);
+                if (rc.canAttackSquare(baddieInfo.location)) {
+                    rc.attackSquare(baddieInfo.location);
+                }
+            }
+        }
+    }
+
     private static void MoveRobot(MapLocation rLoc, MapLocation targetLoc) throws GameActionException {
         Direction dir = rLoc.directionTo(targetLoc);
 
@@ -216,7 +231,18 @@ public class RobotPlayer {
                 power -= GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST;
             }
             else {
-                rc.captureEncampment(RobotType.GENERATOR);
+                // Check how close the encampment is to HQ, if close build an artillery
+                MapLocation goodHQ = rc.senseHQLocation();
+                rc.setIndicatorString(1, String.valueOf(goodHQ.distanceSquaredTo(rLoc)));
+                if (goodHQ.distanceSquaredTo(rLoc) < 40) {
+                    rc.captureEncampment(RobotType.ARTILLERY);
+                }
+                // Otherwise, build a generator
+                else {
+                    rc.captureEncampment(RobotType.GENERATOR);
+                }
+
+                // Indicate that a supplier should be built next.
                 if (power > GameConstants.BROADCAST_SEND_COST) {
                     rc.broadcast(SupplierBuilt, 0);
                     power -= GameConstants.BROADCAST_SEND_COST;
