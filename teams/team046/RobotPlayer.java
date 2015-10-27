@@ -42,17 +42,17 @@ public class RobotPlayer {
             if (rc.senseEnemyNukeHalfDone() && rc.readBroadcast(zergRushChannel) != zergRushCode) {
                 rc.broadcast(zergRushChannel, zergRushCode);
             }
-            else if (round > 50  && !rc.hasUpgrade(Upgrade.FUSION)) {
+            else if (round > 100  && !rc.hasUpgrade(Upgrade.FUSION)) {
                 rc.researchUpgrade(Upgrade.FUSION);
                 return;
             }
-            else if (round > 100  && !rc.hasUpgrade(Upgrade.VISION)) {
+            else if (round > 150  && !rc.hasUpgrade(Upgrade.VISION)) {
                 rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
             else if (power > 250 || round > 1500) {
                 Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam());
-                if (myBuddies.length > 25) {
+                if (myBuddies.length > 30) {
                     rc.researchUpgrade(Upgrade.NUKE);
                     return;
                 }
