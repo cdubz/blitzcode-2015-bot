@@ -50,7 +50,7 @@ public class RobotPlayer {
                 rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
-            else if (power > 250 || round > 1500) {
+            else if (round > 2000 || power > 250) {
                 Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam());
                 if (myBuddies.length > 30) {
                     rc.researchUpgrade(Upgrade.NUKE);
