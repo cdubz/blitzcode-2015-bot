@@ -152,8 +152,8 @@ public class RobotPlayer {
                 }
                 else {
                     MapLocation rallyPoints[] = {
-                        new MapLocation(goodHQ.x + randomWithRange(1,2), goodHQ.y + randomWithRange(1,2)),
-                        new MapLocation(goodHQ.x - randomWithRange(1,2), goodHQ.y - randomWithRange(1,2))
+                        new MapLocation(goodHQ.x + randomWithRange(1,3), goodHQ.y + randomWithRange(1,3)),
+                        new MapLocation(goodHQ.x - randomWithRange(1,3), goodHQ.y - randomWithRange(1,3))
                     };
                     targetLoc = rallyPoints[randomWithRange(0, rallyPoints.length - 1)];
                 }
@@ -223,53 +223,53 @@ public class RobotPlayer {
     }
 
     private static void BuildEncampment(MapLocation rLoc) throws GameActionException {
-        if (power > rc.senseCaptureCost() && rc.senseEncampmentSquare(rLoc)) {
-            if (power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST
-                    && rc.readBroadcast(SupplierBuilt) == 0) {
-                rc.captureEncampment(RobotType.SUPPLIER);
-                rc.broadcast(SupplierBuilt, 1);
-                power -= GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST;
-            }
-            else {
-                // Check how close the encampment is to HQ, if close build an artillery
-                MapLocation goodHQ = rc.senseHQLocation();
-                rc.setIndicatorString(1, String.valueOf(goodHQ.distanceSquaredTo(rLoc)));
-                if (goodHQ.distanceSquaredTo(rLoc) < 40) {
-                    rc.captureEncampment(RobotType.ARTILLERY);
-                }
-                // Otherwise, build a generator
-                else {
-                    rc.captureEncampment(RobotType.GENERATOR);
-                }
-
-                // Indicate that a supplier should be built next.
-                if (power > GameConstants.BROADCAST_SEND_COST) {
-                    rc.broadcast(SupplierBuilt, 0);
-                    power -= GameConstants.BROADCAST_SEND_COST;
-                }
-            }
-        }
-        else {
-            MapLocation encampmentSquares[] = rc.senseAllEncampmentSquares();
-            MapLocation goodEncampments[] = rc.senseAlliedEncampmentSquares();
-            MapLocation targetLoc = encampmentSquares[0];
-            int closest = 1000;
-
-            checkLocations:
-            for (MapLocation loc: encampmentSquares) {
-                int dist = rLoc.distanceSquaredTo(loc);
-                if (dist < closest) {
-                    for (MapLocation goodLoc: goodEncampments) {
-                        if (goodLoc.equals(loc)) {
-                            continue checkLocations;
-                        }
+        if (power > rc.senseCaptureCost()) {
+            if (rc.senseEncampmentSquare(rLoc)) {
+                if (power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST
+                        && rc.readBroadcast(SupplierBuilt) == 0) {
+                    rc.captureEncampment(RobotType.SUPPLIER);
+                    rc.broadcast(SupplierBuilt, 1);
+                    power -= GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST;
+                } else {
+                    // Check how close the encampment is to HQ, if close build an artillery
+                    MapLocation goodHQ = rc.senseHQLocation();
+                    rc.setIndicatorString(1, String.valueOf(goodHQ.distanceSquaredTo(rLoc)));
+                    if (goodHQ.distanceSquaredTo(rLoc) < 40) {
+                        rc.captureEncampment(RobotType.ARTILLERY);
                     }
-                    targetLoc = loc;
-                    closest = dist;
-                }
-            }
+                    // Otherwise, build a generator
+                    else {
+                        rc.captureEncampment(RobotType.GENERATOR);
+                    }
 
-            MoveRobot(rLoc, targetLoc);
+                    // Indicate that a supplier should be built next.
+                    if (power > GameConstants.BROADCAST_SEND_COST) {
+                        rc.broadcast(SupplierBuilt, 0);
+                        power -= GameConstants.BROADCAST_SEND_COST;
+                    }
+                }
+            } else {
+                MapLocation encampmentSquares[] = rc.senseAllEncampmentSquares();
+                MapLocation goodEncampments[] = rc.senseAlliedEncampmentSquares();
+                MapLocation targetLoc = encampmentSquares[0];
+                int closest = 1000;
+
+                checkLocations:
+                for (MapLocation loc : encampmentSquares) {
+                    int dist = rLoc.distanceSquaredTo(loc);
+                    if (dist < closest) {
+                        for (MapLocation goodLoc : goodEncampments) {
+                            if (goodLoc.equals(loc)) {
+                                continue checkLocations;
+                            }
+                        }
+                        targetLoc = loc;
+                        closest = dist;
+                    }
+                }
+
+                MoveRobot(rLoc, targetLoc);
+            }
         }
     }
 
