@@ -42,6 +42,10 @@ public class RobotPlayer {
             if (rc.senseEnemyNukeHalfDone() && rc.readBroadcast(zergRushChannel) != zergRushCode) {
                 rc.broadcast(zergRushChannel, zergRushCode);
             }
+            else if (round > 50  && !rc.hasUpgrade(Upgrade.PICKAXE)) {
+                rc.researchUpgrade(Upgrade.PICKAXE);
+                return;
+            }
             else if (round > 100  && !rc.hasUpgrade(Upgrade.FUSION)) {
                 rc.researchUpgrade(Upgrade.FUSION);
                 return;
@@ -158,20 +162,38 @@ public class RobotPlayer {
 
     private static void MoveRobot(MapLocation rLoc, MapLocation targetLoc) throws GameActionException {
         Direction dir = rLoc.directionTo(targetLoc);
+
         if (dir == Direction.NONE) {
             return;
         }
         else if (dir == Direction.OMNI) {
             dir = Direction.EAST;
         }
-        while (!rc.canMove(dir)) {
-            if ((targetLoc.x == 0 && dir == Direction.SOUTH)
-                    || targetLoc.x == rc.getMapWidth() - 1 && dir == Direction.NORTH) {
-                dir = dir.rotateLeft();
+
+        // If the bot can't move in the default direction, test all other directions
+        if (!rc.canMove(dir)) {
+            int shortest = 1000, testDist;
+            Direction bestDir = dir;
+            MapLocation testLoc;
+
+            for (Direction testDir : Direction.values()) {
+                if (testDir != dir && testDir != Direction.NONE && testDir != Direction.OMNI
+                        && rc.canMove(testDir)) {
+                    testLoc = rLoc.add(testDir);
+                    testDist = testLoc.distanceSquaredTo(targetLoc);
+                    if (testDist < shortest) {
+                        shortest = testDist;
+                        bestDir = testDir;
+                    }
+                }
             }
-            else {
-                dir = dir.rotateRight();
+
+            // If the direction hasn't changed, there is just no where to go.
+            if (bestDir == dir) {
+                return;
             }
+
+            dir = bestDir;
         }
 
         MapLocation nextLoc = rLoc.add(dir);
