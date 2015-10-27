@@ -12,6 +12,7 @@ public class RobotPlayer {
     private static int EncampmentBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int EncampmentSearchStartedChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int SupplierBuilt = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int researchNuke = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -58,8 +59,14 @@ public class RobotPlayer {
                 return;
             }
             else if (round > 2000 || power > 250) {
-                Robot[] myBuddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam());
-                if (myBuddies.length > 30) {
+
+                // Check for a cue from a robot
+                if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(researchNuke) == 1) {
+                    rc.researchUpgrade(Upgrade.NUKE);
+                    return;
+                }
+                // Check the HQ's own surroundings
+                else if (rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam()).length > 30) {
                     rc.researchUpgrade(Upgrade.NUKE);
                     return;
                 }
@@ -156,6 +163,22 @@ public class RobotPlayer {
                         new MapLocation(goodHQ.x - randomWithRange(1,3), goodHQ.y - randomWithRange(1,3))
                     };
                     targetLoc = rallyPoints[randomWithRange(0, rallyPoints.length - 1)];
+                }
+            }
+
+            // If already on targetLoc, sense buddies and send nuke research signal
+            if (power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST) {
+                int currentStatus = rc.readBroadcast(researchNuke);
+                if (rLoc.equals(targetLoc)) {
+                    Robot[] myFriends = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam());
+                    if (myFriends.length > 30 && currentStatus == 0) {
+                        rc.broadcast(researchNuke, 1);
+                    }
+                    else if (myFriends.length < 30 && currentStatus != 0) {
+                        rc.broadcast(researchNuke, 0);
+                    }
+
+                    return;
                 }
             }
 
