@@ -106,7 +106,7 @@ public class RobotPlayer {
                 EncampmentSearchStartedRound = 0;
             }
             if (power > GameConstants.BROADCAST_SEND_COST * 2 && (EncampmentBuilderRobotID == 0
-                    || EncampmentSearchStartedRound + GameConstants.CAPTURE_ROUND_DELAY * 2 < round)) {
+                    || EncampmentSearchStartedRound + GameConstants.CAPTURE_ROUND_DELAY < round)) {
                 rc.broadcast(EncampmentBuilderChannel, rc.getRobot().getID());
                 rc.broadcast(EncampmentSearchStartedChannel, round);
                 power -= GameConstants.BROADCAST_SEND_COST * 2;
@@ -188,7 +188,7 @@ public class RobotPlayer {
 
     private static void Artillery() throws GameActionException {
         if (rc.isActive()) {
-            Robot[] baddies = rc.senseNearbyGameObjects(Robot.class, 63, rc.getTeam().opponent());
+            Robot[] baddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam().opponent());
             if (baddies.length > 0) {
                 RobotInfo baddieInfo = rc.senseRobotInfo(baddies[0]);
                 if (rc.canAttackSquare(baddieInfo.location)) {
