@@ -54,9 +54,10 @@ public class RobotPlayer {
         if (rc.isActive()) {
             if (rc.senseEnemyNukeHalfDone()) {
                 if (rc.checkResearchProgress(Upgrade.NUKE) < 175
-                        && power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST
+                        && power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST * 2
                         && rc.readBroadcast(zergRushChannel) != zergRushCode) {
                     rc.broadcast(zergRushChannel, zergRushCode);
+                    rc.broadcast(researchNuke, 2);
                 }
             }
             else if (round > 50  && !rc.hasUpgrade(Upgrade.PICKAXE)) {
@@ -71,13 +72,14 @@ public class RobotPlayer {
                 rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
-            // Check for research cue set by robot
-            else if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(researchNuke) == 1) {
+            // Check the HQ's own surroundings
+            else if (rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam()).length > hoardNukeResearchMin) {
                 rc.researchUpgrade(Upgrade.NUKE);
                 return;
             }
-            // Check the HQ's own surroundings
-            else if (rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam()).length > hoardNukeResearchMin) {
+
+            // Last check for a nuke research cue
+            if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(researchNuke) != 0) {
                 rc.researchUpgrade(Upgrade.NUKE);
                 return;
             }
@@ -186,7 +188,7 @@ public class RobotPlayer {
                     if (myFriends.length > hoardNukeResearchMin && currentStatus == 0) {
                         rc.broadcast(researchNuke, 1);
                     }
-                    else if (myFriends.length < hoardNukeResearchMin && currentStatus != 0) {
+                    else if (myFriends.length < hoardNukeResearchMin && currentStatus == 1) {
                         rc.broadcast(researchNuke, 0);
                     }
 
