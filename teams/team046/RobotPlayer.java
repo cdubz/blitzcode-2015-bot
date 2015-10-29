@@ -52,8 +52,12 @@ public class RobotPlayer {
 
     private static void HQ() throws GameActionException {
         if (rc.isActive()) {
-            if (rc.senseEnemyNukeHalfDone() && rc.readBroadcast(zergRushChannel) != zergRushCode) {
-                rc.broadcast(zergRushChannel, zergRushCode);
+            if (rc.senseEnemyNukeHalfDone()) {
+                if (rc.checkResearchProgress(Upgrade.NUKE) < 175
+                        && power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST
+                        && rc.readBroadcast(zergRushChannel) != zergRushCode) {
+                    rc.broadcast(zergRushChannel, zergRushCode);
+                }
             }
             else if (round > 50  && !rc.hasUpgrade(Upgrade.PICKAXE)) {
                 rc.researchUpgrade(Upgrade.PICKAXE);
