@@ -1,6 +1,7 @@
 package team046;
 
 import battlecode.common.*;
+import team122.robot.Generator;
 
 public class RobotPlayer {
 
@@ -13,6 +14,8 @@ public class RobotPlayer {
     private static int EncampmentSearchStartedChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int SupplierBuilt = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int researchNuke = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int artilleryTargetX = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int artilleryTargetY = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
 	public static void run(RobotController MyJohn12LongRC) {
         rc = MyJohn12LongRC;
@@ -31,6 +34,12 @@ public class RobotPlayer {
                 else if (rc.getType() == RobotType.ARTILLERY) {
                     Artillery();
                 }
+                /*else if (rc.getType() == RobotType.SUPPLIER) {
+                    Supplier();
+                }
+                else if (rc.getType() == RobotType.GENERATOR) {
+                    Generator();
+                }*/
 
 				rc.yield();
 			}
@@ -187,12 +196,60 @@ public class RobotPlayer {
 
     private static void Artillery() throws GameActionException {
         if (rc.isActive()) {
+            MapLocation target = null;
+            // First check for artillery request from another robot
+            if (power > GameConstants.BROADCAST_READ_COST * 2 + GameConstants.BROADCAST_SEND_COST * 2) {
+                int atX = rc.readBroadcast(artilleryTargetX);
+                int atY = rc.readBroadcast(artilleryTargetY);
+                power -= GameConstants.BROADCAST_READ_COST * 2;
+                if (atX > 0 && atY > 0) {
+                    target = new MapLocation(atX, atY);
+                    rc.broadcast(artilleryTargetX, 0);
+                    rc.broadcast(artilleryTargetY, 0);
+                    power -= GameConstants.BROADCAST_SEND_COST * 2;
+                    rc.setIndicatorString(1, String.valueOf(target));
+                }
+            }
+
+            // If no target or a bad target is set above, check the artillery's own surroundings
+            if (target == null || !rc.canAttackSquare(target)) {
+                Robot[] baddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam().opponent());
+                if (baddies.length > 0) {
+                    RobotInfo baddieInfo = rc.senseRobotInfo(baddies[0]);
+                    target = baddieInfo.location;
+                }
+            }
+
+            if (target != null) {
+                if (rc.canAttackSquare(target)) {
+                    rc.attackSquare(target);
+                }
+            }
+        }
+    }
+
+    /*private static void Supplier() throws GameActionException {
+        if (rc.isActive()) {
+            SenseEnemiesSendArtillery();
+        }
+    }
+
+    private static void Generator() throws GameActionException {
+        if (rc.isActive()) {
+            SenseEnemiesSendArtillery();
+        }
+    }*/
+
+    private static void SenseEnemiesSendArtillery() throws GameActionException {
+        if (power > GameConstants.BROADCAST_READ_COST * 2 + GameConstants.BROADCAST_SEND_COST * 2
+                && rc.readBroadcast(artilleryTargetX) == 0 && rc.readBroadcast(artilleryTargetY) == 0) {
+            power -= GameConstants.BROADCAST_READ_COST * 2;
             Robot[] baddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam().opponent());
             if (baddies.length > 0) {
                 RobotInfo baddieInfo = rc.senseRobotInfo(baddies[0]);
-                if (rc.canAttackSquare(baddieInfo.location)) {
-                    rc.attackSquare(baddieInfo.location);
-                }
+                rc.broadcast(artilleryTargetX, baddieInfo.location.x);
+                rc.broadcast(artilleryTargetY, baddieInfo.location.y);
+                power -= GameConstants.BROADCAST_SEND_COST * 2;
             }
         }
     }
