@@ -50,11 +50,11 @@ public class RobotPlayer {
                 rc.researchUpgrade(Upgrade.PICKAXE);
                 return;
             }
-            else if (round > 100  && !rc.hasUpgrade(Upgrade.FUSION)) {
+            else if (round > 200  && !rc.hasUpgrade(Upgrade.FUSION)) {
                 rc.researchUpgrade(Upgrade.FUSION);
                 return;
             }
-            else if (round > 150  && !rc.hasUpgrade(Upgrade.VISION)) {
+            else if (round > 250  && !rc.hasUpgrade(Upgrade.VISION)) {
                 rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
@@ -65,11 +65,6 @@ public class RobotPlayer {
             }
             // Check the HQ's own surroundings
             else if (rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam()).length > 29) {
-                rc.researchUpgrade(Upgrade.NUKE);
-                return;
-            }
-            // Do some research in random rounds
-            else if (round > 100 && round % 100 < 50 && rc.checkResearchProgress(Upgrade.NUKE) < 200) {
                 rc.researchUpgrade(Upgrade.NUKE);
                 return;
             }
