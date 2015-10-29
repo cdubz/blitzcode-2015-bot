@@ -1,7 +1,6 @@
 package team046;
 
 import battlecode.common.*;
-import team122.robot.Generator;
 
 public class RobotPlayer {
 
