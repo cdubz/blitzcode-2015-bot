@@ -58,30 +58,34 @@ public class RobotPlayer {
                 rc.researchUpgrade(Upgrade.VISION);
                 return;
             }
-            else if (round > 2000 || power > 250) {
-
-                // Check for a cue from a robot
-                if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(researchNuke) == 1) {
-                    rc.researchUpgrade(Upgrade.NUKE);
-                    return;
-                }
-                // Check the HQ's own surroundings
-                else if (rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam()).length > 30) {
-                    rc.researchUpgrade(Upgrade.NUKE);
-                    return;
-                }
+            // Check for research cue set by robot
+            else if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(researchNuke) == 1) {
+                rc.researchUpgrade(Upgrade.NUKE);
+                return;
+            }
+            // Check the HQ's own surroundings
+            else if (rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam()).length > 29) {
+                rc.researchUpgrade(Upgrade.NUKE);
+                return;
+            }
+            // Do some research in random rounds
+            else if (round > 100 && round % 100 < 50 && rc.checkResearchProgress(Upgrade.NUKE) < 200) {
+                rc.researchUpgrade(Upgrade.NUKE);
+                return;
             }
 
             // Find an available spawn direction
-            MapLocation hqLocation = rc.senseHQLocation();
-            MapLocation nextLoc;
-            for (Direction dir : Direction.values()) {
-                if (dir != Direction.NONE && dir != Direction.OMNI && rc.canMove(dir)) {
-                    nextLoc = hqLocation.add(dir);
-                    Team mine = rc.senseMine(nextLoc);
-                    if (mine == null || mine == rc.getTeam()) {
-                        rc.spawn(dir);
-                        break;
+            if (power > 100) {
+                MapLocation hqLocation = rc.senseHQLocation();
+                MapLocation nextLoc;
+                for (Direction dir : Direction.values()) {
+                    if (dir != Direction.NONE && dir != Direction.OMNI && rc.canMove(dir)) {
+                        nextLoc = hqLocation.add(dir);
+                        Team mine = rc.senseMine(nextLoc);
+                        if (mine == null || mine == rc.getTeam()) {
+                            rc.spawn(dir);
+                            break;
+                        }
                     }
                 }
             }
