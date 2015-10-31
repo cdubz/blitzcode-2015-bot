@@ -13,7 +13,7 @@ public class RobotPlayer {
     private static int EncampmentBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int EncampmentSearchStartedChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int SupplierBuilt = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
-    private static int researchNuke = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
+    private static int researchNukeChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int artilleryTargetX = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int artilleryTargetY = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
 
@@ -57,7 +57,7 @@ public class RobotPlayer {
                         && power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST * 2
                         && rc.readBroadcast(zergRushChannel) != zergRushCode) {
                     rc.broadcast(zergRushChannel, zergRushCode);
-                    rc.broadcast(researchNuke, 2);
+                    rc.broadcast(researchNukeChannel, round);
                 }
             }
             else if (round > 50  && !rc.hasUpgrade(Upgrade.PICKAXE)) {
@@ -79,9 +79,17 @@ public class RobotPlayer {
             }
 
             // Last check for a nuke research cue
-            if (power > GameConstants.BROADCAST_READ_COST && rc.readBroadcast(researchNuke) != 0) {
-                rc.researchUpgrade(Upgrade.NUKE);
-                return;
+            if (power > GameConstants.BROADCAST_READ_COST) {
+                int researchNuke = rc.readBroadcast(researchNukeChannel);
+                power -= GameConstants.BROADCAST_READ_COST;
+                if (researchNuke != 0 && round - researchNuke < 11) {
+                    rc.researchUpgrade(Upgrade.NUKE);
+                    return;
+                }
+                else if (power > GameConstants.BROADCAST_SEND_COST && researchNuke != 0) {
+                    rc.broadcast(researchNukeChannel, 0);
+                    power -= GameConstants.BROADCAST_SEND_COST;
+                }
             }
 
             // Find an available spawn direction
@@ -182,14 +190,14 @@ public class RobotPlayer {
 
             // If already on targetLoc, sense buddies and send nuke research signal
             if (power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST) {
-                int currentStatus = rc.readBroadcast(researchNuke);
+                int currentStatus = rc.readBroadcast(researchNukeChannel);
                 if (rLoc.equals(targetLoc)) {
                     Robot[] myFriends = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam());
                     if (myFriends.length > hoardNukeResearchMin && currentStatus == 0) {
-                        rc.broadcast(researchNuke, 1);
+                        rc.broadcast(researchNukeChannel, round);
                     }
                     else if (myFriends.length < hoardNukeResearchMin && currentStatus == 1) {
-                        rc.broadcast(researchNuke, 0);
+                        rc.broadcast(researchNukeChannel, 0);
                     }
 
                     return;
