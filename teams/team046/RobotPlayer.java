@@ -326,7 +326,7 @@ public class RobotPlayer {
             if (rc.senseEncampmentSquare(rLoc)) {
                 // Check how close the encampment is to HQ, if close build an artillery
                 MapLocation goodHQ = rc.senseHQLocation();
-                if (goodHQ.distanceSquaredTo(rLoc) < 40) {
+                if (goodHQ.distanceSquaredTo(rLoc) < 60) {
                     rc.captureEncampment(RobotType.ARTILLERY);
                 }
                 // Otherwise, check status of supplier build and do another one or generator
