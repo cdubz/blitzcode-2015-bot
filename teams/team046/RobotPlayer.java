@@ -151,11 +151,6 @@ public class RobotPlayer {
                 BuildEncampment(rLoc);
                 return;
             }
-            // Check for and plant mines
-            else if (rc.senseMine(rLoc) == null) {
-                rc.layMine();
-                return;
-            }
             else {
                 RobotInfo roboData;
                 Robot[] assholes = rc.senseNearbyGameObjects(Robot.class, 3, rc.getTeam().opponent());
@@ -181,6 +176,11 @@ public class RobotPlayer {
                 else if (mypals.length > 0 && mypals.length <= baddies.length) {
                     roboData = rc.senseRobotInfo(mypals[0]);
                     targetLoc = roboData.location;
+                }
+                // Check for and plant mines
+                else if (rc.senseMine(rLoc) == null) {
+                    rc.layMine();
+                    return;
                 }
             }
 
