@@ -157,10 +157,30 @@ public class RobotPlayer {
                 return;
             }
             else {
-                // Get scared
-                Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 3, rc.getTeam().opponent());
-                if (nearbyEnemies.length > 0) {
-                    return;
+                RobotInfo roboData;
+                Robot[] assholes = rc.senseNearbyGameObjects(Robot.class, 3, rc.getTeam().opponent());
+                Robot[] baddies = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam().opponent());
+                Robot[] mypals = rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam());
+                if (assholes.length > 0) {
+                    // ATTACK!
+                    if (assholes.length == 1) {
+                        roboData = rc.senseRobotInfo(assholes[0]);
+                        targetLoc = roboData.location;
+                    }
+                    // Ahhhhh!!~!~
+                    else {
+                        return;
+                    }
+                }
+                // If we have greater numbers, be more aggressive
+                else if (baddies.length > 0 && mypals.length > baddies.length) {
+                    roboData = rc.senseRobotInfo(baddies[0]);
+                    targetLoc = roboData.location;
+                }
+                // If we are outnumbered, stop circling around like dumbasses
+                else if (mypals.length > 0 && mypals.length <= baddies.length) {
+                    roboData = rc.senseRobotInfo(mypals[0]);
+                    targetLoc = roboData.location;
                 }
             }
 
