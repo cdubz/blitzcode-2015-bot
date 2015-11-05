@@ -58,18 +58,18 @@ public class RobotPlayer {
                     rc.broadcast(researchNukeChannel, round);
                 }
             }
-            else if (round > 50  && !rc.hasUpgrade(Upgrade.PICKAXE)) {
+            /*else if (round > 50 && !rc.hasUpgrade(Upgrade.PICKAXE)) {
                 rc.researchUpgrade(Upgrade.PICKAXE);
                 return;
             }
-            else if (round > 200  && !rc.hasUpgrade(Upgrade.FUSION)) {
+            else if (round > 200 && !rc.hasUpgrade(Upgrade.FUSION)) {
                 rc.researchUpgrade(Upgrade.FUSION);
                 return;
             }
-            else if (round > 250  && !rc.hasUpgrade(Upgrade.VISION)) {
+            else if (round > 250 && !rc.hasUpgrade(Upgrade.VISION)) {
                 rc.researchUpgrade(Upgrade.VISION);
                 return;
-            }
+            }*/
             // Check the HQ's own surroundings
             else if (rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam()).length > hoardNukeResearchMin) {
                 rc.researchUpgrade(Upgrade.NUKE);
