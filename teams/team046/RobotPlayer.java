@@ -296,17 +296,8 @@ public class RobotPlayer {
                     rc.captureEncampment(RobotType.ARTILLERY);
                 }
                 // Otherwise, check status of supplier build and do another one or generator
-                else if (power > GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST) {
-                    if (rc.readBroadcast(SupplierBuilt) == 0) {
-                        rc.captureEncampment(RobotType.SUPPLIER);
-                        rc.broadcast(SupplierBuilt, 1);
-                        power -= GameConstants.BROADCAST_READ_COST + GameConstants.BROADCAST_SEND_COST;
-                    }
-                    else {
-                        rc.captureEncampment(RobotType.GENERATOR);
-                        rc.broadcast(SupplierBuilt, 0);
-                        power -= GameConstants.BROADCAST_SEND_COST;
-                    }
+                else {
+                    rc.captureEncampment(RobotType.SUPPLIER);
                 }
             }
             else {
