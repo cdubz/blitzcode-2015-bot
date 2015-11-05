@@ -7,7 +7,7 @@ public class RobotPlayer {
     private static RobotController rc;
     private static int round;
     private static double power;
-    private static int hoardNukeResearchMin = 29;
+    private static int hoardNukeResearchMin = 50;
     private static int zergRushChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int zergRushCode = randomWithRange(2, GameConstants.BROADCAST_MAX_CHANNELS);
     private static int EncampmentBuilderChannel = randomWithRange(0, GameConstants.BROADCAST_MAX_CHANNELS);
@@ -71,7 +71,8 @@ public class RobotPlayer {
                 return;
             }*/
             // Check the HQ's own surroundings
-            else if (rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam()).length > hoardNukeResearchMin) {
+            else if ((round > 100 && power < 100)
+                    || rc.senseNearbyGameObjects(Robot.class, 33, rc.getTeam()).length > hoardNukeResearchMin) {
                 rc.researchUpgrade(Upgrade.NUKE);
                 return;
             }
