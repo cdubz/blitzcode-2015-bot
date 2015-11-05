@@ -98,12 +98,6 @@ public class RobotPlayer {
                     nextLoc = hqLocation.add(dir);
                     Team mine = rc.senseMine(nextLoc);
                     if (mine == null || mine == rc.getTeam()) {
-
-                        // Calls for nuke research for the next few rounds.
-                        if (power > GameConstants.BROADCAST_SEND_COST) {
-                            rc.broadcast(researchNukeChannel, round);
-                        }
-
                         rc.spawn(dir);
                         break;
                     }
