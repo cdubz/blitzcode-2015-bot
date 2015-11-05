@@ -91,23 +91,21 @@ public class RobotPlayer {
             }
 
             // Find an available spawn direction
-            if (power > 100) {
-                MapLocation hqLocation = rc.senseHQLocation();
-                MapLocation nextLoc;
-                for (Direction dir : Direction.values()) {
-                    if (dir != Direction.NONE && dir != Direction.OMNI && rc.canMove(dir)) {
-                        nextLoc = hqLocation.add(dir);
-                        Team mine = rc.senseMine(nextLoc);
-                        if (mine == null || mine == rc.getTeam()) {
+            MapLocation hqLocation = rc.senseHQLocation();
+            MapLocation nextLoc;
+            for (Direction dir : Direction.values()) {
+                if (dir != Direction.NONE && dir != Direction.OMNI && rc.canMove(dir)) {
+                    nextLoc = hqLocation.add(dir);
+                    Team mine = rc.senseMine(nextLoc);
+                    if (mine == null || mine == rc.getTeam()) {
 
-                            // Calls for nuke research for the next few rounds.
-                            if (power > GameConstants.BROADCAST_SEND_COST) {
-                                rc.broadcast(researchNukeChannel, round);
-                            }
-
-                            rc.spawn(dir);
-                            break;
+                        // Calls for nuke research for the next few rounds.
+                        if (power > GameConstants.BROADCAST_SEND_COST) {
+                            rc.broadcast(researchNukeChannel, round);
                         }
+
+                        rc.spawn(dir);
+                        break;
                     }
                 }
             }
