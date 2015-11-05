@@ -174,7 +174,7 @@ public class RobotPlayer {
                     targetLoc = roboData.location;
                 }
                 // Check for and plant mines
-                else if (rc.senseMine(rLoc) == null) {
+                else if (baddies.length == 0 && rc.senseMine(rLoc) == null) {
                     rc.layMine();
                     return;
                 }
